@@ -1,9 +1,9 @@
-from .basic_graph import Graph
+from .basic_graph_gpu import Graph
 
 _ErrorUnknownNode = 'Node is not in the graph'
 
 
-class UndirectedGraph(Graph):
+class UndirectedGraphGPU(Graph):
     """
     An undirected graphical model.
     """

@@ -1,11 +1,11 @@
-from causal_discovery_utils import constraint_based
-from .basic_equivalance_class_graph import MixedGraph
-from .partially_dag import PDAG
+from causal_discovery_utils import constraint_based_gpu as constraint_based
+from .basic_equivalance_class_graph_gpu import MixedGraph
+from .partially_dag_gpu import gpuPDAG as PDAG
 from . import arrow_head_types as Mark
 from itertools import combinations
 import numpy as np
 
-class PAG(MixedGraph):
+class gpuPAG(MixedGraph):
     """
     Partial Ancestral Graph. It has three arrow-head/edge-mark types: 'circle', 'undirected', and 'directed',
     and six edge types: o--o, o---, o-->, --->, <-->, and ----

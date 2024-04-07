@@ -1,6 +1,6 @@
 import numpy as np
 from itertools import combinations
-from .undirected_graph import UndirectedGraph
+from .undirected_graph_gpu import UndirectedGraphGPU as UndirectedGraph
 
 
 class MixedGraph:

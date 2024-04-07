@@ -1,9 +1,9 @@
 from itertools import combinations
-from .basic_equivalance_class_graph import MixedGraph
+from .basic_equivalance_class_graph_gpu import MixedGraph
 from . import arrow_head_types as Mark
 
 
-class PDAG(MixedGraph):
+class gpuPDAG(MixedGraph):
     """
     Partially directed graph having two type of arrowheads: directed (--> node) and undirected (--- node)
     """

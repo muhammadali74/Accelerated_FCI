@@ -1,6 +1,6 @@
-from causal_discovery_utils.constraint_based import LearnStructBase # cleaned
-from causal_discovery_algs.pc import LearnStructPC #cleaned
-from graphical_models import PAG, arrow_head_types as Mark
+from causal_discovery_utils.constraint_based_gpu import LearnStructBase # cleaned
+from causal_discovery_algs.pc_gpu import LearnStructPC #cleaned
+from graphical_models import gpuPAG as PAG, arrow_head_types as Mark
 from itertools import combinations
 
 import taichi as ti

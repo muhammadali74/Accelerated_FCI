@@ -1,6 +1,6 @@
 from itertools import combinations, chain
 from causal_discovery_utils.constraint_based import LearnStructBase, unique_element_iterator
-from graphical_models import PDAG
+from graphical_models import gpuPDAG as PDAG
 
 
 class LearnStructPC(LearnStructBase):

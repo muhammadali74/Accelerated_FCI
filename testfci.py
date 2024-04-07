@@ -14,7 +14,7 @@ rand_seed = 42  # arbitrary seed (ASCII code of the Asterisk symbol)
 random.seed(rand_seed)
 np.random.seed(rand_seed)
 
-num_nodes = 25
+num_nodes = 15
 num_records = 1000
 connectivity_coeff = 2.0
 min_lin_coeff = 0.5  # minimal 'strength' of an edge
@@ -48,7 +48,7 @@ par_corr_icd = CondIndepParCorr(
 # run fci on dataset
 # Learn the PAG
 par_corr_fci = CondIndepParCorr(dataset=dataset, threshold=alpha, count_tests=True, use_cache=True)  # CI test
-print("done ci tests")
+print(par_corr_fci)
 fci = LearnStructFCI(observed_set, par_corr_fci)  # instantiate an FCI learner
 print(timeit.timeit(lambda:fci.learn_structure(),number = 1)) # learn the PAG
 

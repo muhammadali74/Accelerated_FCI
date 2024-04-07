@@ -27,6 +27,7 @@ class CacheCI:
                     hkey, _ = self.get_hkeys(i, j, ())  # get a key for the (i, j) pair (simply order them)
                     self._cache[hkey] = dict()
 
+
     def get_hkeys(self, x, y, zz):
         """
         Return a keys for hashing variable-pair and for the condition set
@@ -134,68 +135,68 @@ class DSep:
         return res
 
 
-class GraphCondIndep:
-    """
-    GraphCondIndep: a CI test that derive its result from a given graph.
-    Depending on the graph type, an appropriate criterion is used:
-        DAG type: d-separation criterion
-        PAG type: m-separation criterion
-    """
-    def __init__(self, reference_graph, static_conditioning=None, count_tests=False, use_cache=False, verbose=False):
-        """
-        Initialize GraphCondIndep, a CI test that derive its result from a given graph.
+# class GraphCondIndep:
+#     """
+#     GraphCondIndep: a CI test that derive its result from a given graph.
+#     Depending on the graph type, an appropriate criterion is used:
+#         DAG type: d-separation criterion
+#         PAG type: m-separation criterion
+#     """
+#     def __init__(self, reference_graph, static_conditioning=None, count_tests=False, use_cache=False, verbose=False):
+#         """
+#         Initialize GraphCondIndep, a CI test that derive its result from a given graph.
 
-        :param reference_graph: a graph from which independence relations are inferred. Only DAG and PAG are supported.
-        :param static_conditioning: a set of nodes that will always be included in the conditioning set.
-        :param count_tests: if True, count the number of CI test queries (default: False). Mainly for debug
-        :param use_cache: if True, cache CI tests' results (default: False). Used for avoiding redundant CI tests.
-        :param verbose: Verbose flag (default: False). Mainly for debug
-        """
-        self.reference_graph = reference_graph
-        self.verbose = verbose
+#         :param reference_graph: a graph from which independence relations are inferred. Only DAG and PAG are supported.
+#         :param static_conditioning: a set of nodes that will always be included in the conditioning set.
+#         :param count_tests: if True, count the number of CI test queries (default: False). Mainly for debug
+#         :param use_cache: if True, cache CI tests' results (default: False). Used for avoiding redundant CI tests.
+#         :param verbose: Verbose flag (default: False). Mainly for debug
+#         """
+#         self.reference_graph = reference_graph
+#         self.verbose = verbose
 
-        if type(reference_graph) == DAG:
-            self.ci_criterion = reference_graph.dsep
-        elif type(reference_graph) == PAG:
-            self.ci_criterion = reference_graph.is_m_separated
-        else:
-            raise TypeError('Unsupported graph type.')
+#         if type(reference_graph) == DAG:
+#             self.ci_criterion = reference_graph.dsep
+#         elif type(reference_graph) == PAG:
+#             self.ci_criterion = reference_graph.is_m_separated
+#         else:
+#             raise TypeError('Unsupported graph type.')
 
-        if static_conditioning is None or type(static_conditioning) == tuple:
-            self.static_conditioning = static_conditioning
-        else:
-            raise TypeError('Static conditioning, if defined, should be a tuple.')
+#         if static_conditioning is None or type(static_conditioning) == tuple:
+#             self.static_conditioning = static_conditioning
+#         else:
+#             raise TypeError('Static conditioning, if defined, should be a tuple.')
 
-        num_nodes = len(reference_graph.nodes_set)
-        self.count_tests = count_tests
-        if count_tests:
-            self.test_counter = [0 for _ in range(num_nodes - 1)]
-        else:
-            self.test_counter = None
+#         num_nodes = len(reference_graph.nodes_set)
+#         self.count_tests = count_tests
+#         if count_tests:
+#             self.test_counter = [0 for _ in range(num_nodes - 1)]
+#         else:
+#             self.test_counter = None
 
-        self.is_cache = use_cache
-        if use_cache:
-            self.cache_ci = CacheCI(num_nodes)
-        else:
-            self.cache_ci = CacheCI(None)
+#         self.is_cache = use_cache
+#         if use_cache:
+#             self.cache_ci = CacheCI(num_nodes)
+#         else:
+#             self.cache_ci = CacheCI(None)
 
-    def cond_indep(self, x, y, zz_conditioning):
-        if self.static_conditioning is None:
-            zz = zz_conditioning
-        else:
-            zz = tuple(set(zz_conditioning + self.static_conditioning))
+#     def cond_indep(self, x, y, zz_conditioning):
+#         if self.static_conditioning is None:
+#             zz = zz_conditioning
+#         else:
+#             zz = tuple(set(zz_conditioning + self.static_conditioning))
 
-        res = self.cache_ci.get_cache_result(x, y, zz)
+#         res = self.cache_ci.get_cache_result(x, y, zz)
 
-        if res is None:
-            res = self.ci_criterion(x, y, zz)
-            if self.verbose:
-                print(self.ci_criterion.__name__, '(', x, ',', y, '|', zz, ')', '=', res)
-            if self.is_cache:
-                self.cache_ci.set_cache_result(x, y, zz, res)
-            if self.count_tests:
-                self.test_counter[len(zz)] += 1  # update counter only if the test was not previously cached
-        return res
+#         if res is None:
+#             res = self.ci_criterion(x, y, zz)
+#             if self.verbose:
+#                 print(self.ci_criterion.__name__, '(', x, ',', y, '|', zz, ')', '=', res)
+#             if self.is_cache:
+#                 self.cache_ci.set_cache_result(x, y, zz, res)
+#             if self.count_tests:
+#                 self.test_counter[len(zz)] += 1  # update counter only if the test was not previously cached
+#         return res
 
 
 class StatCondIndep:
@@ -346,77 +347,77 @@ class CondIndepParCorr(StatCondIndep):
         return statistic
 
 
-class CondIndepCMI(StatCondIndep):
-    def __init__(self, dataset, threshold, weights=None, retained_edges=None, count_tests=False, use_cache=False):
-        self.weight_data_type = float
-        if weights is not None:
-            weights = np.array(weights, dtype=self.weight_data_type)
-            # if np.min(weights) < 0:
-            #     raise Exception('Negative sample weights are not allowed')
-            # if np.abs(np.sum(weights) - 1.0) > np.finfo(self.weight_data_type).eps:
-            #     raise Exception('Sample weights do not sum to 1.0')
-            # weights *= dataset.shape[0]
-        super().__init__(dataset, threshold, database_type=int, weights=weights, retained_edges=retained_edges,
-                         count_tests=count_tests, use_cache=use_cache)
+# class CondIndepCMI(StatCondIndep):
+#     def __init__(self, dataset, threshold, weights=None, retained_edges=None, count_tests=False, use_cache=False):
+#         self.weight_data_type = float
+#         if weights is not None:
+#             weights = np.array(weights, dtype=self.weight_data_type)
+#             # if np.min(weights) < 0:
+#             #     raise Exception('Negative sample weights are not allowed')
+#             # if np.abs(np.sum(weights) - 1.0) > np.finfo(self.weight_data_type).eps:
+#             #     raise Exception('Sample weights do not sum to 1.0')
+#             # weights *= dataset.shape[0]
+#         super().__init__(dataset, threshold, database_type=int, weights=weights, retained_edges=retained_edges,
+#                          count_tests=count_tests, use_cache=use_cache)
 
-    def cond_indep(self, x, y, zz):
-        res = super().cond_indep(x, y, zz)
-        return not res  # invert the decision because the statistic is correlation level and not p-value
+#     def cond_indep(self, x, y, zz):
+#         res = super().cond_indep(x, y, zz)
+#         return not res  # invert the decision because the statistic is correlation level and not p-value
 
-    def calc_statistic(self, x, y, zz):
-        """
-        Calculate conditional mutual information for discrete variables
-        :param x: 1st variable (index)
-        :param y: 2nd variable (index)
-        :param zz: condition set, a tuple. e.g., if zz contains a single value zz = (val,)
-        :return: Empirical conditional mutual information
-        """
-        all_var_idx = (x, y) + zz
-        dd = self.data[:, all_var_idx]
-        var_size = [self.node_size[node_i] for node_i in all_var_idx]
+#     def calc_statistic(self, x, y, zz):
+#         """
+#         Calculate conditional mutual information for discrete variables
+#         :param x: 1st variable (index)
+#         :param y: 2nd variable (index)
+#         :param zz: condition set, a tuple. e.g., if zz contains a single value zz = (val,)
+#         :return: Empirical conditional mutual information
+#         """
+#         all_var_idx = (x, y) + zz
+#         dd = self.data[:, all_var_idx]
+#         var_size = [self.node_size[node_i] for node_i in all_var_idx]
 
-        hist_count = calc_stats(data=dd, var_size=var_size, weights=self.weights)
-        if hist_count is None:  # memory error
-            return 0
-        hist_count = np.reshape(hist_count, [var_size[0], var_size[1], -1],
-                                order='F')  # 3rd axis is the states of condition set
-        cmi = self._calc_cmi_from_counts(hist_count)
-        #
-        # xsize, ysize, csize = hist_count.shape
-        #
-        # # Calculate conditional mutual information
-        # cmi = 0
-        # for zi in range(csize):
-        #     cnt = hist_count[:, :, zi]
-        #     cnum = cnt.sum()
-        #     for node_i in range(self.node_size[x]):
-        #         for node_j in range(self.node_size[y]):
-        #             if cnt[node_i, node_j] > 0:
-        #                 cnt_val = cnt[node_i, node_j]
-        #                 cx = cnt[:, node_j].sum()  # sum over y for specific x-state
-        #                 cy = cnt[node_i, :].sum()  # sum over x for specific y-state
-        #
-        #                 lg = math.log(cnt_val*cnum / (cx * cy))
-        #                 cmi_ = lg*cnt_val/self.num_records
-        #                 cmi += cmi_
-        return cmi
+#         hist_count = calc_stats(data=dd, var_size=var_size, weights=self.weights)
+#         if hist_count is None:  # memory error
+#             return 0
+#         hist_count = np.reshape(hist_count, [var_size[0], var_size[1], -1],
+#                                 order='F')  # 3rd axis is the states of condition set
+#         cmi = self._calc_cmi_from_counts(hist_count)
+#         #
+#         # xsize, ysize, csize = hist_count.shape
+#         #
+#         # # Calculate conditional mutual information
+#         # cmi = 0
+#         # for zi in range(csize):
+#         #     cnt = hist_count[:, :, zi]
+#         #     cnum = cnt.sum()
+#         #     for node_i in range(self.node_size[x]):
+#         #         for node_j in range(self.node_size[y]):
+#         #             if cnt[node_i, node_j] > 0:
+#         #                 cnt_val = cnt[node_i, node_j]
+#         #                 cx = cnt[:, node_j].sum()  # sum over y for specific x-state
+#         #                 cy = cnt[node_i, :].sum()  # sum over x for specific y-state
+#         #
+#         #                 lg = math.log(cnt_val*cnum / (cx * cy))
+#         #                 cmi_ = lg*cnt_val/self.num_records
+#         #                 cmi += cmi_
+#         return cmi
 
-    def _calc_cmi_from_counts(self, hist_count):
-        xsize, ysize, csize = hist_count.shape
+#     def _calc_cmi_from_counts(self, hist_count):
+#         xsize, ysize, csize = hist_count.shape
 
-        # Calculate conditional mutual information
-        cmi = 0
-        for zi in range(csize):
-            cnt = hist_count[:, :, zi]
-            cnum = cnt.sum()
-            for node_i in range(xsize):
-                for node_j in range(ysize):
-                    if cnt[node_i, node_j] > 0:
-                        cnt_val = cnt[node_i, node_j]
-                        cx = cnt[:, node_j].sum()  # sum over y for specific x-state
-                        cy = cnt[node_i, :].sum()  # sum over x for specific y-state
+#         # Calculate conditional mutual information
+#         cmi = 0
+#         for zi in range(csize):
+#             cnt = hist_count[:, :, zi]
+#             cnum = cnt.sum()
+#             for node_i in range(xsize):
+#                 for node_j in range(ysize):
+#                     if cnt[node_i, node_j] > 0:
+#                         cnt_val = cnt[node_i, node_j]
+#                         cx = cnt[:, node_j].sum()  # sum over y for specific x-state
+#                         cy = cnt[node_i, :].sum()  # sum over x for specific y-state
 
-                        lg = math.log(cnt_val*cnum / (cx * cy))
-                        cmi_ = lg*cnt_val/self.num_records
-                        cmi += cmi_
-        return cmi
+#                         lg = math.log(cnt_val*cnum / (cx * cy))
+#                         cmi_ = lg*cnt_val/self.num_records
+#                         cmi += cmi_
+#         return cmi
