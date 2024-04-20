@@ -202,7 +202,7 @@ __device__ int calculate_statistic(int x, int y, int *zz, int n)
     {
       for (int j = 0; j < n + 2; ++j)
       {
-        // printf("all_var_idx[i] = %d, all_var_idx[j] = %d, coeff = %f \n", all_var_idx[i], all_var_idx[j], correlation_matrix[all_var_idx[i] * numnodes + all_var_idx[j]]);
+        printf("all_var_idx[i] = %d, all_var_idx[j] = %d, coeff = %f \n", all_var_idx[i], all_var_idx[j], correlation_matrix[all_var_idx[i] * numnodes + all_var_idx[j]]);
         // if (all_var_idx[i] < 0 || all_var_idx[j] < 0 || all_var_idx[i] >= numnodes || all_var_idx[j] >= numnodes)
         // {
         //   // corr_coef_subset[i * (n + 2) + j] = 0.0;
