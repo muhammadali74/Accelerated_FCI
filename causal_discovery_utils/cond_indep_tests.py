@@ -301,8 +301,11 @@ class CondIndepParCorr(StatCondIndep):
                          count_tests=count_tests, use_cache=use_cache, num_records=num_records, num_vars=num_vars)
 
         self.correlation_matrix = None
+        np.set_printoptions(threshold=np.inf)
         if self.data is not None:
             self.correlation_matrix = np.corrcoef(self.data, rowvar=False)  # np.corrcoef(self.data.T)
+            print(self.correlation_matrix)
+            print(self.correlation_matrix.shape)
         self.data = None  # no need to store the data, as we have the correlation matrix
 
     def calc_statistic(self, x, y, zz):
@@ -326,7 +329,9 @@ class CondIndepParCorr(StatCondIndep):
             all_var_idx = (x, y) + zz
             corr_coef_subset = corr_coef[np.ix_(all_var_idx, all_var_idx)]
             inv_corr_coef = -np.linalg.inv(corr_coef_subset)  # consider using pinv instead of inv
+            
             par_corr = inv_corr_coef[0, 1] / np.sqrt(abs(inv_corr_coef[0, 0] * inv_corr_coef[1, 1]))
+            # print("inv_corr_coef", inv_corr_coef, par_corr)
 
         if par_corr >= 1.0:
             return 0
@@ -343,6 +348,7 @@ class CondIndepParCorr(StatCondIndep):
         z = 0.5 * np.log1p(2 * par_corr / (1 - par_corr))  # Fisher Z-transform, 0.5*log( (1+par_corr)/(1-par_corr) )
         val_for_cdf = abs(np.sqrt(degrees_of_freedom - 1) * z)  # approximately normally distributed
         statistic = 2 * (1 - stats.norm.cdf(val_for_cdf))  # p-value
+        print("stats test", statistic, par_corr, zz,x,y, z, val_for_cdf)
 
         return statistic
 

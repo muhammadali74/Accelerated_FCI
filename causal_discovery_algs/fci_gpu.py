@@ -3,8 +3,8 @@ from causal_discovery_algs.pc_gpu import LearnStructPC #cleaned
 from graphical_models import gpuPAG as PAG, arrow_head_types as Mark
 from itertools import combinations
 
-import taichi as ti
-import taichi.math as tm
+# import taichi as ti
+# import taichi.math as tm
 import timeit
 
 
@@ -37,7 +37,8 @@ class LearnStructFCI(LearnStructBase):
 
         # the resulting graph has only o--o, o-->, or <--> edges
         # find and remove edges between pairs of variables that are d-separated by some subset of Possible-D-SEP sets
-        self.found_D_Sep_link = self._refine_pc_skeleton()
+        print(timeit.timeit(lambda:self._refine_pc_skeleton(), number = 1))
+        # self.found_D_Sep_link = self._refine_pc_skeleton() # takes the most time of the algorithm
 
         # re-orient
         self.graph.reset_orientations(default_mark=Mark.Circle)
@@ -74,15 +75,35 @@ class LearnStructFCI(LearnStructBase):
         pds_list = dict()
 
         # Prepare the possible-d-sep set for each of the nodes
+        
+
+        # also takes less time
         for node_x in self.graph.nodes_set:
             pds_list[node_x] = possible_d_sep = self._create_pds_set(node_x)  # self.get_pds(node_x)
+        
 
         # Test CI for the graph edges
+        # start_time = timeit.default_timer()
+        print("pdslist:", pds_list)
+        print("graph", self.graph._graph)
+        print(self.graph.nodes_set)
+        print(self.sepset._sepset)
+
+
         for node_x in self.graph.nodes_set:
             possible_d_sep = pds_list[node_x]
             adjacent_nodes = self.graph.find_adjacent_nodes(node_x)
             for node_y in adjacent_nodes:
-                found_indep |= self._test_ci_increasing(node_x, node_y, possible_d_sep - {node_y})
+                possible_d = possible_d_sep.copy() - {node_y}
+                condsets = []
+                for ci_size in range(len(possible_d)+1):
+                    condsets.extend(list(combinations(possible_d, ci_size)))
+
+                # found_indep |= self._test_ci_increasing(node_x, node_y, possible_d_sep - {node_y})
+                found_indep |= self._test_ci_increasing2(node_x, node_y, condsets)
+        # end_time = timeit.default_timer()
+        # execution_time = end_time - start_time
+        # print("Execution time:", execution_time, "seconds")
 
         return found_indep
 
@@ -95,13 +116,42 @@ class LearnStructFCI(LearnStructBase):
         :param pds_super_set: a super-set of nodes from which to construct conditioning sets
         :return: True if an edge was deleted, False if no independence was found
         """
+        print("condindep", self.ci_test)
+
+        # combinations
+
+        print("sepset", self.sepset)
         cond_indep = self.ci_test.cond_indep  # for better readability
         for ci_size in range(len(pds_super_set)+1):  # loop over condition set sizes; increasing set sizes
             for cond_set in combinations(pds_super_set, ci_size):  # loop over condition sets of a fixed size
+                print("cpndset", cond_set)
                 if cond_indep(node_x, node_y, cond_set):
                     self.graph.delete_edge(node_x, node_y)
                     self.sepset.set_sepset(node_x, node_y, cond_set)
                     return True
+
+        return False
+    
+    def _test_ci_increasing2(self, node_x, node_y, pds_super_set):
+        """
+        Search for a minimal separating set by gradually increasing conditioning set size.
+        :param node_x: a node on one side of the tested edge
+        :param node_y: a node on the other side of the tested edge
+        :param pds_super_set: a super-set of nodes from which to construct conditioning sets
+        :return: True if an edge was deleted, False if no independence was found
+        """
+        print("condindep",self.ci_test)
+        # combinations
+
+        print("sepset", self.sepset)
+        cond_indep = self.ci_test.cond_indep  # for better readability
+        # for ci_size in range(len(pds_super_set)+1):  # loop over condition set sizes; increasing set sizes
+        #     for cond_set in combinations(pds_super_set, ci_size):  # loop over condition sets of a fixed size
+        for cond_set in pds_super_set:
+            if cond_indep(node_x, node_y, cond_set):
+                self.graph.delete_edge(node_x, node_y)
+                self.sepset.set_sepset(node_x, node_y, cond_set)
+                return True
 
         return False
 

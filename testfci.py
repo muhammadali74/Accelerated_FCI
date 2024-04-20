@@ -44,6 +44,7 @@ par_corr_icd = CondIndepParCorr(
     use_cache=True
 )
 
+print(dataset.shape)
 
 # run fci on dataset
 # Learn the PAG
@@ -53,6 +54,7 @@ fci = LearnStructFCI(observed_set, par_corr_fci)  # instantiate an FCI learner
 print(timeit.timeit(lambda:fci.learn_structure(),number = 1)) # learn the PAG
 
 learned_pag_fci = fci.graph
+print(fci.graph)
 
 # Calculate structural errors: FCI algorithm
 fci_result = calc_structural_accuracy_pag(pag_tested=learned_pag_fci, pag_correct=true_pag)

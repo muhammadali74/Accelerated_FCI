@@ -3,8 +3,8 @@ from causal_discovery_algs.pc import LearnStructPC #cleaned
 from graphical_models import PAG, arrow_head_types as Mark
 from itertools import combinations
 
-import taichi as ti
-import taichi.math as tm
+# import taichi as ti
+# import taichi.math as tm
 import timeit
 
 

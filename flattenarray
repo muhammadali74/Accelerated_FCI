@@ -1,0 +1,30 @@
+data = {
+    0: {3, 12},
+    1: {11, 14},
+    3: {0, 14},
+    5: {8},
+    6: { 9,14},
+    7: {12},
+    8: {5, 9,13},
+    9: {6, 8},
+    10: {14},
+    11: {1},
+    12: {0, 7},
+    13: {8},
+    14: {1, 3, 6,10}
+}
+
+# Create a 15x15 array filled with -1
+result = [[0] * 15 for _ in range(15)]
+
+# Iterate through the data and populate the array
+for row, values in data.items():
+    values = list(values)
+    for i in values:
+        result[row][i] = 1
+
+# Flatten the array
+flattened_array = [item for sublist in result for item in sublist]
+
+# Print the flattened array
+print(flattened_array)

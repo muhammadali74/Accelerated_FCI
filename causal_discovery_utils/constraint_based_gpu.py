@@ -21,6 +21,7 @@ class SeparationSet:
     def __init__(self, nodes_set):
         self._sepset = dict()
         self.nodes_set = nodes_set
+        print("initilaizing sep set,", nodes_set)
         for (i, j) in combinations(nodes_set, 2):
             hkey = self.get_hash_key(i, j)
             self._sepset[hkey] = set()
@@ -42,6 +43,7 @@ class SeparationSet:
 
     def set_sepset(self, node_1, node_2, sepset):
         hkey = self.get_hash_key(node_1, node_2)
+        print(node_1, node_2, sepset, hkey)
         self._sepset[hkey] = set(sepset)
 
     def get_sepset(self, node_1, node_2):
