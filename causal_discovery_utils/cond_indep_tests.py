@@ -256,15 +256,15 @@ class StatCondIndep:
             self.cache_ci = CacheCI(None)
 
     def cond_indep(self, x, y, zz):
-        if self.is_edge_retained(x, y):
-            return False  # do not test and return: "not independent"
+        # if self.is_edge_retained(x, y):
+        #     return False  # do not test and return: "not independent"
 
-        statistic = self.cache_ci.get_cache_result(x, y, zz)
+        # statistic = self.cache_ci.get_cache_result(x, y, zz)
 
-        if statistic is None:
-            statistic = self.calc_statistic(x, y, zz)  # calculate correlation level
-            self._debug_process(x, y, zz, statistic)
-            self._cache_it(x, y, zz, statistic)
+        # if statistic is None:
+        statistic = self.calc_statistic(x, y, zz)  # calculate correlation level
+        self._debug_process(x, y, zz, statistic)
+        self._cache_it(x, y, zz, statistic)
 
         res = statistic > self.threshold  # test if p-value is greater than the threshold
         return res
@@ -304,8 +304,8 @@ class CondIndepParCorr(StatCondIndep):
         np.set_printoptions(threshold=np.inf)
         if self.data is not None:
             self.correlation_matrix = np.corrcoef(self.data, rowvar=False)  # np.corrcoef(self.data.T)
-            print(self.correlation_matrix)
-            print(self.correlation_matrix.shape)
+            # print(self.correlation_matrix)
+            # print(self.correlation_matrix.shape)
         self.data = None  # no need to store the data, as we have the correlation matrix
 
     def calc_statistic(self, x, y, zz):
@@ -348,7 +348,7 @@ class CondIndepParCorr(StatCondIndep):
         z = 0.5 * np.log1p(2 * par_corr / (1 - par_corr))  # Fisher Z-transform, 0.5*log( (1+par_corr)/(1-par_corr) )
         val_for_cdf = abs(np.sqrt(degrees_of_freedom - 1) * z)  # approximately normally distributed
         statistic = 2 * (1 - stats.norm.cdf(val_for_cdf))  # p-value
-        print("stats test", statistic, par_corr, zz,x,y, z, val_for_cdf)
+        # print("stats test", statistic, par_corr, zz,x,y, z, val_for_cdf)
 
         return statistic
 

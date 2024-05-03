@@ -10,7 +10,8 @@ class gpuPAG(MixedGraph):
     Partial Ancestral Graph. It has three arrow-head/edge-mark types: 'circle', 'undirected', and 'directed',
     and six edge types: o--o, o---, o-->, --->, <-->, and ----
     """
-    def __init__(self, nodes_set):
+    def __init__(self, nodes_set, numnodes = 0):
+        self.numnodes = numnodes
         super().__init__(nodes_set, [Mark.Circle, Mark.Directed, Mark.Tail])
         self.sepset = constraint_based.SeparationSet(nodes_set)
         self.visible_edges = None  # a set of visible edges, where each element is a tuple: (parent, child)
@@ -75,9 +76,10 @@ class gpuPAG(MixedGraph):
          3: Tail
         :return: a square numpy matrix format.
         """
-        num_vars = len(self.nodes_set)
+        # num_vars = len(self.nodes_set)
+        num_vars = self.numnodes
         adj_mat = np.zeros((num_vars, num_vars), dtype=int)
-        node_index_map = {node: i for i, node in enumerate(sorted(self.nodes_set))}
+        node_index_map = {i: i for i in range(num_vars)}
 
         # convert adjacency to PAG
         arrow_type_map = dict()
@@ -88,7 +90,8 @@ class gpuPAG(MixedGraph):
         for node in self._graph:
             for edge_mark in self.edge_mark_types:
                 for node_p in self._graph[node][edge_mark]:
-                    adj_mat[node_index_map[node_p]][node_index_map[node]] = arrow_type_map[edge_mark]
+                    # adj_mat[node_index_map[node_p]][node_index_map[node]] = arrow_type_map[edge_mark]
+                    adj_mat[node_index_map[node_p]][node_index_map[node]] = 1
 
         return adj_mat
 

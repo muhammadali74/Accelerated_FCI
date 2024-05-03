@@ -5,12 +5,12 @@ class LearnStructBase:
     """
     Base class for constraint-based structure learning algorithms
     """
-    def __init__(self, graph_class, nodes_set, ci_test):
+    def __init__(self, graph_class, nodes_set, ci_test, numnodes = 0):
         if not isinstance(nodes_set, set):
             raise ValueError('nodes_set should be a set type')
         self.ci_test = ci_test
         self.sepset = SeparationSet(nodes_set)
-        self.graph = graph_class(nodes_set)  # e.g., graph_class=PDAG (for CPDAG under causal sufficiency) or PAG
+        self.graph = graph_class(nodes_set, numnodes)  # e.g., graph_class=PDAG (for CPDAG under causal sufficiency) or PAG
         self.graph.sepset = self.sepset  # link the algorithm's updated sepset to the graph (by reference)
 
     def get_graph(self):

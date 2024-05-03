@@ -49,12 +49,9 @@ print(dataset.shape)
 # run fci on dataset
 # Learn the PAG
 par_corr_fci = CondIndepParCorr(dataset=dataset, threshold=alpha, count_tests=True, use_cache=True)  # CI test
-print(par_corr_fci)
-fci = LearnStructFCI(observed_set, par_corr_fci)  # instantiate an FCI learner
+fci = LearnStructFCI(observed_set, par_corr_fci, num_nodes)  # instantiate an FCI learner
 print(timeit.timeit(lambda:fci.learn_structure(),number = 1)) # learn the PAG
-
 learned_pag_fci = fci.graph
-print(fci.graph)
 
 # Calculate structural errors: FCI algorithm
 fci_result = calc_structural_accuracy_pag(pag_tested=learned_pag_fci, pag_correct=true_pag)
@@ -80,4 +77,3 @@ plt.xlabel('conditioning set size')
 plt.ylabel('number of CI tests')
 plt.grid(True)
 plt.show()
-

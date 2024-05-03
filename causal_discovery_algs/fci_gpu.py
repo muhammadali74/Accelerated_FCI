@@ -6,12 +6,16 @@ from itertools import combinations
 # import taichi as ti
 # import taichi.math as tm
 import timeit
+import numpy as np
+import sys
+sys.path.append('../')
+from fci_pycuda import main
 
 
 class LearnStructFCI(LearnStructBase):
-    def __init__(self, nodes_set, ci_test,
+    def __init__(self, nodes_set, ci_test,numnodes,
                  is_selection_bias=True, is_tail_completeness=True):
-        super().__init__(PAG, nodes_set=nodes_set, ci_test=ci_test)
+        super().__init__(PAG, nodes_set=nodes_set, ci_test=ci_test, numnodes = numnodes)
 
         assert isinstance(is_selection_bias, bool)
         self.is_selection_bias = is_selection_bias  # if False, orientation rules R5, R6, R7 are not executed.
@@ -21,6 +25,13 @@ class LearnStructFCI(LearnStructBase):
         self.graph.create_complete_graph(Mark.Circle, nodes_set)  # Create a fully connected graph with edges: o--o
         self.pc_alg = LearnStructPC(nodes_set, ci_test)  # initialize a PC object for learning the skeleton
         self.found_D_Sep_link = False  # indicates if the learner removed an edges that the PC stage didn't remove
+
+        self.adj_matrix = None
+        self.pds_list_new = np.full((numnodes, numnodes), -1, dtype=np.int32)
+        self.numnodes = numnodes
+        self.correlation_matrix = ci_test.correlation_matrix.flatten().astype(np.float32)
+        self.graphnodes = np.full(numnodes, -1, dtype=np.int32)
+        self.graphnodes[:len(self.graph.nodes_set)] = np.array(list(self.graph.nodes_set), dtype=np.int32)
 
     def learn_structure(self):
         """
@@ -80,30 +91,33 @@ class LearnStructFCI(LearnStructBase):
         # also takes less time
         for node_x in self.graph.nodes_set:
             pds_list[node_x] = possible_d_sep = self._create_pds_set(node_x)  # self.get_pds(node_x)
-        
+            self.pds_list_new[node_x, :len(possible_d_sep)] = np.array(list(possible_d_sep), dtype=np.int32)
+
+        self.adj_matrix = self.graph.get_adj_mat()
+        self.pds_list_new = self.pds_list_new.flatten()
+        # print("adj_matrix", self.adj_matrix)
 
         # Test CI for the graph edges
         # start_time = timeit.default_timer()
-        print("pdslist:", pds_list)
-        print("graph", self.graph._graph)
-        print(self.graph.nodes_set)
-        print(self.sepset._sepset)
+        # print("pdslist:", pds_list)
+        # print("pdslistnew:", self.pds_list_new)
+        # print("graph", self.graph._graph)
+        # print("nodes set", self.graph.nodes_set)
+        # print("sepset", self.sepset._sepset)
+        # print("correlation_matrix", self.correlation_matrix)
 
+        # for pyude run this
+        # self.adj_matrix = main(self.adj_matrix, self.correlation_matrix,self.pds_list_new,  self.graphnodes, self.numnodes, 1000, 7, self.ci_test.threshold)
+
+
+        # print("adj_matrix", self.adj_matrix)
 
         for node_x in self.graph.nodes_set:
             possible_d_sep = pds_list[node_x]
             adjacent_nodes = self.graph.find_adjacent_nodes(node_x)
             for node_y in adjacent_nodes:
-                possible_d = possible_d_sep.copy() - {node_y}
-                condsets = []
-                for ci_size in range(len(possible_d)+1):
-                    condsets.extend(list(combinations(possible_d, ci_size)))
+                found_indep |= self._test_ci_increasing(node_x, node_y, possible_d_sep - {node_y})
 
-                # found_indep |= self._test_ci_increasing(node_x, node_y, possible_d_sep - {node_y})
-                found_indep |= self._test_ci_increasing2(node_x, node_y, condsets)
-        # end_time = timeit.default_timer()
-        # execution_time = end_time - start_time
-        # print("Execution time:", execution_time, "seconds")
 
         return found_indep
 
@@ -116,15 +130,15 @@ class LearnStructFCI(LearnStructBase):
         :param pds_super_set: a super-set of nodes from which to construct conditioning sets
         :return: True if an edge was deleted, False if no independence was found
         """
-        print("condindep", self.ci_test)
+        # print("condindep", self.ci_test)
 
         # combinations
 
-        print("sepset", self.sepset)
+        # print("sepset", self.sepset)
         cond_indep = self.ci_test.cond_indep  # for better readability
         for ci_size in range(len(pds_super_set)+1):  # loop over condition set sizes; increasing set sizes
             for cond_set in combinations(pds_super_set, ci_size):  # loop over condition sets of a fixed size
-                print("cpndset", cond_set)
+                # print("cpndset", cond_set)
                 if cond_indep(node_x, node_y, cond_set):
                     self.graph.delete_edge(node_x, node_y)
                     self.sepset.set_sepset(node_x, node_y, cond_set)
@@ -140,10 +154,10 @@ class LearnStructFCI(LearnStructBase):
         :param pds_super_set: a super-set of nodes from which to construct conditioning sets
         :return: True if an edge was deleted, False if no independence was found
         """
-        print("condindep",self.ci_test)
+        # print("condindep",self.ci_test)
         # combinations
 
-        print("sepset", self.sepset)
+        # print("sepset", self.sepset)
         cond_indep = self.ci_test.cond_indep  # for better readability
         # for ci_size in range(len(pds_super_set)+1):  # loop over condition set sizes; increasing set sizes
         #     for cond_set in combinations(pds_super_set, ci_size):  # loop over condition sets of a fixed size
