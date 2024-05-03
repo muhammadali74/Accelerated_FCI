@@ -391,7 +391,7 @@ __global__ void fci_parent_kernel(int *g)
 {
   // int level = blockIdx.x * blockDim.x + threadIdx.x;
   // if (level <= 3)
-  for (int level = 0; level < numnodes-3; level++)
+  for (int level = 0; level < maxlevelsss; level++)
   {
     if (level == 0)
     {
@@ -399,7 +399,7 @@ __global__ void fci_parent_kernel(int *g)
     }
     else
     {
-      fci_level_kernel<<<dim3(numnodes, numnodes), dim3(1, 1)>>>(g, level);
+      fci_level_kernel<<<dim3(numnodes, numnodes/2), dim3(10, 2)>>>(g, level);
     }
   }
 }
@@ -431,6 +431,7 @@ def main(adj_matrix, correlation_matrix, pds_list, graphnodes, numnodes, numsamp
     cuda_string = cuda_string.replace("blocksize", str(blocksize))
     cuda_string = cuda_string.replace("INFINITY", str(9999999))
     cuda_string = cuda_string.replace("alpha", str(alpha)) 
+    cuda_string = cuda_string.replace("maxlevelsss", str(maxdepth))
 
     coreelation_mat_string = coreelation_mat_string +  "{" + ",".join([str(i) for i in correlation_matrix]) + "}; \n"
     # print(coreelation_mat_string)
