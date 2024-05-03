@@ -28,7 +28,7 @@ dag, observed_set, latents_set = create_random_dag_with_latents(
     connectivity_coeff
 )
 
-true_pag = find_true_pag(dag, observed_set)
+# true_pag = find_true_pag(dag, observed_set)
 
 dataset = sample_data_from_dag(
     dag,
@@ -55,7 +55,7 @@ fci.learn_structure()
 learned_pag_fci = fci.graph
 
 # Calculate structural errors: FCI algorithm
-fci_result = calc_structural_accuracy_pag(pag_tested=learned_pag_fci, pag_correct=true_pag)
+# fci_result = calc_structural_accuracy_pag(pag_tested=learned_pag_fci, pag_correct=true_pag)
 
 # def print_structural_accuracy(structural_accuracy: dict):
 #     print('Edge precision: {:.2f}'.format(structural_accuracy['edge_precision']))
