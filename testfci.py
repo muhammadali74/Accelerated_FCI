@@ -50,30 +50,31 @@ print(dataset.shape)
 # Learn the PAG
 par_corr_fci = CondIndepParCorr(dataset=dataset, threshold=alpha, count_tests=True, use_cache=True)  # CI test
 fci = LearnStructFCI(observed_set, par_corr_fci, num_nodes)  # instantiate an FCI learner
-print(timeit.timeit(lambda:fci.learn_structure(),number = 1)) # learn the PAG
+# print(timeit.timeit(lambda:fci.learn_structure(),number = 1)) # learn the PAG
+fci.learn_structure()
 learned_pag_fci = fci.graph
 
 # Calculate structural errors: FCI algorithm
 fci_result = calc_structural_accuracy_pag(pag_tested=learned_pag_fci, pag_correct=true_pag)
 
-def print_structural_accuracy(structural_accuracy: dict):
-    print('Edge precision: {:.2f}'.format(structural_accuracy['edge_precision']))
-    print('Edge recall: {:.2f}'.format(structural_accuracy['edge_recall']))
-    print('F1 Score: {:.2f}'.format(structural_accuracy['edge_F1']))
-    print('Orientation accuracy: {:.2f}'.format(structural_accuracy['orientation_correctness']))
+# def print_structural_accuracy(structural_accuracy: dict):
+#     print('Edge precision: {:.2f}'.format(structural_accuracy['edge_precision']))
+#     print('Edge recall: {:.2f}'.format(structural_accuracy['edge_recall']))
+#     print('F1 Score: {:.2f}'.format(structural_accuracy['edge_F1']))
+#     print('Orientation accuracy: {:.2f}'.format(structural_accuracy['orientation_correctness']))
 
 
 
-print('\nFCI performance')
-print('---------------')
-print_structural_accuracy(fci_result)
-print('Total number of CI tests: ', sum(par_corr_fci.test_counter))
+# print('\nFCI performance')
+# print('---------------')
+# print_structural_accuracy(fci_result)
+# print('Total number of CI tests: ', sum(par_corr_fci.test_counter))
 
-plt.figure()
-x_range = range(len(par_corr_icd.test_counter))
-plt.plot(x_range, par_corr_fci.test_counter, 'xr:')
-plt.legend(('FCI'))
-plt.xlabel('conditioning set size')
-plt.ylabel('number of CI tests')
-plt.grid(True)
-plt.show()
+# plt.figure()
+# x_range = range(len(par_corr_icd.test_counter))
+# plt.plot(x_range, par_corr_fci.test_counter, 'xr:')
+# plt.legend(('FCI'))
+# plt.xlabel('conditioning set size')
+# plt.ylabel('number of CI tests')
+# plt.grid(True)
+# plt.show()

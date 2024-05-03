@@ -48,6 +48,7 @@ class LearnStructFCI(LearnStructBase):
 
         # the resulting graph has only o--o, o-->, or <--> edges
         # find and remove edges between pairs of variables that are d-separated by some subset of Possible-D-SEP sets
+        print("time using fci procedure")
         print(timeit.timeit(lambda:self._refine_pc_skeleton(), number = 1))
         # self.found_D_Sep_link = self._refine_pc_skeleton() # takes the most time of the algorithm
 
@@ -67,8 +68,9 @@ class LearnStructFCI(LearnStructBase):
         """
 
         # self.pc_alg.learn_skeleton()
-        print("to use pc")
-        print(timeit.timeit(lambda:self.pc_alg.learn_skeleton(),number = 1))
+        # print("to use pc")
+        # print(timeit.timeit(lambda:self.pc_alg.learn_skeleton(),number = 1))
+        self.pc_alg.learn_skeleton()
         self.sepset.copy_from(self.pc_alg.sepset, self.graph.nodes_set)
         self.graph.create_empty_graph()
         self.graph.copy_skeleton_from_pdag(self.pc_alg.graph)  # create edges with o-marks: X o--o Y
@@ -87,7 +89,7 @@ class LearnStructFCI(LearnStructBase):
 
         # Prepare the possible-d-sep set for each of the nodes
         
-
+        
         # also takes less time
         for node_x in self.graph.nodes_set:
             pds_list[node_x] = possible_d_sep = self._create_pds_set(node_x)  # self.get_pds(node_x)
@@ -96,6 +98,7 @@ class LearnStructFCI(LearnStructBase):
         self.adj_matrix = self.graph.get_adj_mat()
         self.pds_list_new = self.pds_list_new.flatten()
         # print("adj_matrix", self.adj_matrix)
+        k = max([len(i) for i in pds_list.values()])
 
         # Test CI for the graph edges
         # start_time = timeit.default_timer()
@@ -107,7 +110,7 @@ class LearnStructFCI(LearnStructBase):
         # print("correlation_matrix", self.correlation_matrix)
 
         # for pyude run this
-        # self.adj_matrix = main(self.adj_matrix, self.correlation_matrix,self.pds_list_new,  self.graphnodes, self.numnodes, 1000, 7, self.ci_test.threshold)
+        # self.adj_matrix = main(self.adj_matrix, self.correlation_matrix,self.pds_list_new,  self.graphnodes, self.numnodes, 1000, k, self.ci_test.threshold)
 
 
         # print("adj_matrix", self.adj_matrix)
